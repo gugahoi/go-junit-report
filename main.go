@@ -190,7 +190,7 @@ func main() {
 	for _, s := range report.TestSuite {
 		for _, c := range s.TestCases {
 			if c.Failure != "" {
-				failureBlock(buffer, c.Name, c.ClassName, c.Failure)
+				FailureBlock(buffer, c.Name, c.ClassName, c.Failure)
 			}
 		}
 	}
@@ -198,7 +198,8 @@ func main() {
 	fmt.Fprint(os.Stderr, buffer)
 }
 
-func failureBlock(writer io.Writer, name string, class string, body string) error {
+// FailureBlock writes a block with detailed failure output into a given writer
+func FailureBlock(writer io.Writer, name string, class string, body string) error {
 	tmpl := `
 	<details>
 		<summary>
