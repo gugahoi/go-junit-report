@@ -1,8 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"encoding/xml"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,9 +10,22 @@ import (
 )
 
 func main() {
-	files := os.Args[1:]
-	buffer := bytes.NewBufferString("")
+	outputFilePath := flag.String("o", "", "file path to store the output (if blank, outputs to stdout)")
+	flag.Parse()
 
+	// If no outputFilePath (-o flag) is given, we should use stdout
+	var output io.Writer
+	output = os.Stdout
+	if *outputFilePath != "" {
+		f, err := os.Create(*outputFilePath)
+		defer f.Close()
+		if err != nil {
+			os.Exit(1)
+		}
+		output = f
+	}
+
+	files := flag.Args()
 	for _, f := range files {
 		data, err := ioutil.ReadFile(f)
 		if err != nil {
@@ -25,32 +38,26 @@ func main() {
 		for _, s := range report.TestSuite {
 			for _, c := range s.TestCases {
 				if c.Failure != "" {
-					FailureBlock(buffer, c.Name, c.ClassName, c.Failure)
+					WriteToBuffer(output, c.Name, c.ClassName, c.Failure)
 				}
 			}
 		}
-
 	}
-	fmt.Fprint(os.Stderr, buffer)
 }
 
-// FailureBlock writes a block with detailed failure output into a given writer
-func FailureBlock(writer io.Writer, name string, class string, body string) error {
+// WriteToBuffer writes a block with detailed failure output into a given writer
+func WriteToBuffer(buf io.Writer, name string, class string, body string) error {
 	tmpl := `
 	<details>
 		<summary>
-			<code>
-				%s in %s
-			</code>
+			<code>%s in %s</code>
 		</summary>
 		<code>
-			<pre>
-%s
-			</pre>
+			<pre>%s</pre>
 		</code>
 	</details>
 `
-	_, err := fmt.Fprintf(writer, tmpl, name, class, body)
+	_, err := fmt.Fprintf(buf, tmpl, name, class, body)
 	if err != nil {
 		return err
 	}

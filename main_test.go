@@ -8,7 +8,7 @@ import (
 	. "github.com/gugahoi/go-junit-md"
 )
 
-func TestFailureBlock(t *testing.T) {
+func TestWriteToBuffer(t *testing.T) {
 	testCases := []struct {
 		desc   string
 		writer io.Writer
@@ -22,7 +22,7 @@ func TestFailureBlock(t *testing.T) {
 			// arrange
 
 			// assign
-			err := FailureBlock(tC.writer, "name", "class", "body")
+			err := WriteToBuffer(tC.writer, "name", "class", "body")
 
 			// assert
 			if err != nil {
