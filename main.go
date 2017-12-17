@@ -13,17 +13,8 @@ func main() {
 	outputFilePath := flag.String("o", "", "file path to store the output (if blank, outputs to stdout)")
 	flag.Parse()
 
-	// If no outputFilePath (-o flag) is given, we should use stdout
-	var output io.Writer
-	output = os.Stdout
-	if *outputFilePath != "" {
-		f, err := os.Create(*outputFilePath)
-		defer f.Close()
-		if err != nil {
-			os.Exit(1)
-		}
-		output = f
-	}
+	output, close := SetOutput(*outputFilePath)
+	defer close()
 
 	files := flag.Args()
 	for _, f := range files {
@@ -62,6 +53,25 @@ func WriteToBuffer(buf io.Writer, name string, class string, body string) error 
 		return err
 	}
 	return nil
+}
+
+// SetOutput returns a writer to a given file path, if none is given it returns os.Stdout
+func SetOutput(filePath string) (output io.Writer, close func() error) {
+	if filePath == "" {
+		output = os.Stdout
+		return
+	}
+
+	f, err := os.Create(filePath)
+	close = f.Close
+	if err != nil {
+		close()
+		fmt.Fprintf(os.Stderr, "Unable to open output file '%s': %v", filePath, err)
+		os.Exit(1)
+	}
+
+	output = f
+	return
 }
 
 // TestSuites are JUnit test suites
