@@ -5,196 +5,32 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 )
 
 func main() {
-	data := `
-  <testsuites name="mmgp-frontend tests">
-	<testsuite name="Actions: User" tests="24" errors="0" failures="0" skipped="0" timestamp="2017-12-15T05:36:02" time="2.97">
-	  <testcase classname="Actions: User loadUserProfileSuccess should return login state" name="Actions: User loadUserProfileSuccess should return login state" time="0.005">
-	  </testcase>
-	  <testcase classname="Actions: User loadUserProfile should return user profile details from server" name="Actions: User loadUserProfile should return user profile details from server" time="0.005">
-	  </testcase>
-	  <testcase classname="Actions: User updateUserProfile updates user profile then run load success function" name="Actions: User updateUserProfile updates user profile then run load success function" time="0.003">
-	  </testcase>
-	  <testcase classname="Actions: User getAPICredentials should return API keys from server" name="Actions: User getAPICredentials should return API keys from server" time="0.002">
-	  </testcase>
-	  <testcase classname="Actions: User toggleAPICredential should toggle API credential" name="Actions: User toggleAPICredential should toggle API credential" time="0">
-	  </testcase>
-	  <testcase classname="Actions: User toggleAllAPICredentials should toggle all API credentials" name="Actions: User toggleAllAPICredentials should toggle all API credentials" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User toggleShowAPICredential should toggle showing API credentials" name="Actions: User toggleShowAPICredential should toggle showing API credentials" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User deleteAPICredential should delete API keys that are checked" name="Actions: User deleteAPICredential should delete API keys that are checked" time="0.003">
-	  </testcase>
-	  <testcase classname="Actions: User createAPICredential should create API credential" name="Actions: User createAPICredential should create API credential" time="0.002">
-	  </testcase>
-	  <testcase classname="Actions: User clearNewAPICredential should clear editing API credential" name="Actions: User clearNewAPICredential should clear editing API credential" time="0">
-	  </testcase>
-	  <testcase classname="Actions: User editAPICredential should move selected API credential to edit" name="Actions: User editAPICredential should move selected API credential to edit" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User clearEditAPICredential should clear editing API credential" name="Actions: User clearEditAPICredential should clear editing API credential" time="0">
-	  </testcase>
-	  <testcase classname="Actions: User updateAPICredential should update API credential" name="Actions: User updateAPICredential should update API credential" time="0.002">
-	  </testcase>
-	  <testcase classname="Actions: User resetPassword should reset users password" name="Actions: User resetPassword should reset users password" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User resetPassword should throw error when server sends bad data" name="Actions: User resetPassword should throw error when server sends bad data" time="0">
-	  </testcase>
-	  <testcase classname="Actions: User clearResetPassword should clear existing reset password email" name="Actions: User clearResetPassword should clear existing reset password email" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User resetUserPassword  resets user password then redirects user" name="Actions: User resetUserPassword  resets user password then redirects user" time="0.002">
-	  </testcase>
-	  <testcase classname="Actions: User resetUserPassword  resets user password only" name="Actions: User resetUserPassword  resets user password only" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User setUserPassword  success if data is valid" name="Actions: User setUserPassword  success if data is valid" time="0.002">
-	  </testcase>
-	  <testcase classname="Actions: User register  success if data is valid" name="Actions: User register  success if data is valid" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User register  bad response if no validation code is returned" name="Actions: User register  bad response if no validation code is returned" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User validate pin  success if pin is valid" name="Actions: User validate pin  success if pin is valid" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User validate pin  bad response if not successful" name="Actions: User validate pin  bad response if not successful" time="0.001">
-	  </testcase>
-	  <testcase classname="Actions: User lookupIp  lookupIp" name="Actions: User lookupIp  lookupIp" time="0.003">
-	  </testcase>
-	</testsuite>
-	<testsuite name="Reducer: User Reducer" tests="18" errors="0" failures="0" skipped="0" timestamp="2017-12-15T05:36:05" time="0.347">
-	  <testcase classname="Reducer: User Reducer should return the initial state" name="Reducer: User Reducer should return the initial state" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer USER_PROFILE_LOADING should trigger loading in progress" name="Reducer: User Reducer USER_PROFILE_LOADING should trigger loading in progress" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer USER_VALIDATION_SUCCESS should trigger loading in progress" name="Reducer: User Reducer USER_VALIDATION_SUCCESS should trigger loading in progress" time="0">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer USER_PROFILE_LOAD_SUCCESS should trigger log in and change browserHistory" name="Reducer: User Reducer USER_PROFILE_LOAD_SUCCESS should trigger log in and change browserHistory" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer USER_PROFILE_LOAD_SUCCESS Should have a default phone country code when no phone provided" name="Reducer: User Reducer USER_PROFILE_LOAD_SUCCESS Should have a default phone country code when no phone provided" time="0">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer USER_LOGIN_SUCCESS should trigger log in and change browserHistory" name="Reducer: User Reducer USER_LOGIN_SUCCESS should trigger log in and change browserHistory" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer API_CREDENTIALS_LOADING should trigger loading on API key version" name="Reducer: User Reducer API_CREDENTIALS_LOADING should trigger loading on API key version" time="0">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should trigger loading Get API Credentials success" name="Reducer: User Reducer should trigger loading Get API Credentials success" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should toggle checkbox on API credential" name="Reducer: User Reducer should toggle checkbox on API credential" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should trigger toggling all API Credentials" name="Reducer: User Reducer should trigger toggling all API Credentials" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should toggle show on API credential" name="Reducer: User Reducer should toggle show on API credential" time="0">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should trigger create API Credentials success" name="Reducer: User Reducer should trigger create API Credentials success" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should clear API Credentials" name="Reducer: User Reducer should clear API Credentials" time="0">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should trigger editing API Credential" name="Reducer: User Reducer should trigger editing API Credential" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should clear edit API Credential" name="Reducer: User Reducer should clear edit API Credential" time="0">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should store users email on password reset" name="Reducer: User Reducer should store users email on password reset" time="0.001">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer should clear forgot password email" name="Reducer: User Reducer should clear forgot password email" time="0">
-	  </testcase>
-	  <testcase classname="Reducer: User Reducer loaded IP Data" name="Reducer: User Reducer loaded IP Data" time="0.001">
-	  </testcase>
-	</testsuite>
-	<testsuite name="User API: Login" tests="23" errors="0" failures="0" skipped="0" timestamp="2017-12-15T05:36:06" time="0.445">
-	  <testcase classname="User API: Login returns session_id if call is successful" name="User API: Login returns session_id if call is successful" time="0.004">
-	  </testcase>
-	  <testcase classname="User API: Login returns error message" name="User API: Login returns error message" time="0.002">
-	  </testcase>
-	  <testcase classname="User API: Login returns error if fetch fails" name="User API: Login returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Register returns verification pin code if succcessful" name="User API: Register returns verification pin code if succcessful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Register returns error if fetch fails" name="User API: Register returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Validate Pin returns success if valid" name="User API: Validate Pin returns success if valid" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Validate Pin returns error if fetch fails" name="User API: Validate Pin returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Get User Details returns user details if call is successful" name="User API: Get User Details returns user details if call is successful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Get User Details returns error if fetch fails" name="User API: Get User Details returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Update User Details returns user details if call is successful" name="User API: Update User Details returns user details if call is successful" time="0.007">
-	  </testcase>
-	  <testcase classname="User API: Update User Details returns error if fetch fails" name="User API: Update User Details returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Get API Keys returns API keys if call is successful" name="User API: Get API Keys returns API keys if call is successful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Get API Keys returns error if fetch fails" name="User API: Get API Keys returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Delete API Keys returns if delete is successful" name="User API: Delete API Keys returns if delete is successful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Delete API Keys returns error if fetch fails" name="User API: Delete API Keys returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Create API Keys returns new key is successful" name="User API: Create API Keys returns new key is successful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Create API Keys returns error if fetch fails" name="User API: Create API Keys returns error if fetch fails" time="0">
-	  </testcase>
-	  <testcase classname="User API: Update API Key returns 200 if update is successful" name="User API: Update API Key returns 200 if update is successful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Update API Key returns error if fetch fails" name="User API: Update API Key returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Reset Password returns user details if call is successful" name="User API: Reset Password returns user details if call is successful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Reset Password returns error if fetch fails" name="User API: Reset Password returns error if fetch fails" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Validate Reset Password Code returns 200 if reset is successful" name="User API: Validate Reset Password Code returns 200 if reset is successful" time="0.001">
-	  </testcase>
-	  <testcase classname="User API: Validate Reset Password Code returns error if fetch fails" name="User API: Validate Reset Password Code returns error if fetch fails" time="0.001">
-	  </testcase>
-	</testsuite>
-	<testsuite name="View: Banner" tests="8" errors="0" failures="1" skipped="0" timestamp="2017-12-15T05:05:36" time="0.082">
-		<testcase classname="View: Banner Renders toprsuccess" name="View: Banner Renders toprsuccess" time="0.001">
-			<failure>Error: Warning: Failed prop type: Invalid prop "format" of value "topr" supplied to "Banner", expected one of [&quot;top&quot;,&quot;inline&quot;].
-				in Banner
-				at BufferedConsole.Object.&lt;anonymous&gt;.console.error (/code/tools/jest-setup.js:74:9)
-				at printWarning (/code/node_modules/prop-types/node_modules/fbjs/lib/warning.js:33:15)
-				at warning (/code/node_modules/prop-types/node_modules/fbjs/lib/warning.js:57:20)
-				at checkPropTypes (/code/node_modules/prop-types/checkPropTypes.js:52:11)
-				at validatePropTypes (/code/node_modules/react/cjs/react.development.js:1247:5)
-				at Object.createElement (/code/node_modules/react/cjs/react.development.js:1297:5)
-				at Object.&lt;anonymous&gt; (/code/src/components/banner/banner.spec.js:11:47)
-				at Object.asyncFn (/code/node_modules/jest-jasmine2/build/jasmine_async.js:124:345)
-				at resolve (/code/node_modules/jest-jasmine2/build/queue_runner.js:46:12)
-				at new Promise (&lt;anonymous&gt;)
-				at mapper (/code/node_modules/jest-jasmine2/build/queue_runner.js:34:499)
-				at promise.then (/code/node_modules/jest-jasmine2/build/queue_runner.js:74:39)
-				at &lt;anonymous&gt;
-			</failure>
-		</testcase>
-		<testcase classname="View: Banner Renders topralert" name="View: Banner Renders topralert" time="0.003">
-		</testcase>
-		<testcase classname="View: Banner Renders toprinfo" name="View: Banner Renders toprinfo" time="0.001">
-		</testcase>
-		<testcase classname="View: Banner Renders toprerror" name="View: Banner Renders toprerror" time="0.001">
-		</testcase>
-		<testcase classname="View: Banner Renders inlinesuccess" name="View: Banner Renders inlinesuccess" time="0.001">
-		</testcase>
-		<testcase classname="View: Banner Renders inlinealert" name="View: Banner Renders inlinealert" time="0.001">
-		</testcase>
-		<testcase classname="View: Banner Renders inlineinfo" name="View: Banner Renders inlineinfo" time="0">
-		</testcase>
-		<testcase classname="View: Banner Renders inlineerror" name="View: Banner Renders inlineerror" time="0">
-		</testcase>
-	</testsuite>
-  </testsuites>
-`
-	var report TestSuites
-	xml.Unmarshal([]byte(data), &report)
-
+	files := os.Args[1:]
 	buffer := bytes.NewBufferString("")
-	for _, s := range report.TestSuite {
-		for _, c := range s.TestCases {
-			if c.Failure != "" {
-				FailureBlock(buffer, c.Name, c.ClassName, c.Failure)
+
+	for _, f := range files {
+		data, err := ioutil.ReadFile(f)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed reading file '%s': %v\n", f, err)
+		}
+
+		var report TestSuites
+		xml.Unmarshal([]byte(data), &report)
+
+		for _, s := range report.TestSuite {
+			for _, c := range s.TestCases {
+				if c.Failure != "" {
+					FailureBlock(buffer, c.Name, c.ClassName, c.Failure)
+				}
 			}
 		}
-	}
 
+	}
 	fmt.Fprint(os.Stderr, buffer)
 }
 
@@ -203,10 +39,14 @@ func FailureBlock(writer io.Writer, name string, class string, body string) erro
 	tmpl := `
 	<details>
 		<summary>
-			<code>%s in %s</code>
+			<code>
+				%s in %s
+			</code>
 		</summary>
 		<code>
-			<pre>%s</pre>
+			<pre>
+%s
+			</pre>
 		</code>
 	</details>
 `
