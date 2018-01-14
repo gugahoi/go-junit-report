@@ -9,78 +9,70 @@ import (
 	"os"
 )
 
+func usage() {
+	fmt.Fprint(os.Stderr, `
+      _             _ _                                  _                                      _            
+     (_)_   _ _ __ (_) |_      _ __ ___ _ __   ___  _ __| |_       ___ ___  _ ____   _____ _ __| |_ ___ _ __ 
+     | | | | | '_ \| | __|____| '__/ _ \ '_ \ / _ \| '__| __|____ / __/ _ \| '_ \ \ / / _ \ '__| __/ _ \ '__|
+     | | |_| | | | | | ||_____| | |  __/ |_) | (_) | |  | ||_____| (_| (_) | | | \ V /  __/ |  | ||  __/ |   
+    _/ |\__,_|_| |_|_|\__|    |_|  \___| .__/ \___/|_|   \__|     \___\___/|_| |_|\_/ \___|_|   \__\___|_|   
+   |__/                                |_|                                                                   
+
+	junit-report-converter report.xml	
+	junit-report-converter report1.xml report2.xml	
+	`)
+	os.Exit(1)
+}
+
 func main() {
-	outputFilePath := flag.String("o", "", "file path to store the output (if blank, outputs to stdout)")
 	flag.Parse()
-
-	output, close := SetOutput(*outputFilePath)
-	defer close()
-
-	files := flag.Args()
-	for _, f := range files {
+	if len(flag.Args()) == 0 {
+		usage()
+	}
+	for _, f := range flag.Args() {
 		data, err := ioutil.ReadFile(f)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed reading file '%s': %v\n", f, err)
+			continue
 		}
+		xmlToTemplate(os.Stdout, defaultTemplate, data)
+	}
+}
 
-		var report TestSuites
-		xml.Unmarshal([]byte(data), &report)
-
-		for _, s := range report.TestSuite {
-			for _, c := range s.TestCases {
-				if c.Failure != "" {
-					WriteToBuffer(output, c.Name, c.ClassName, c.Failure)
-				}
+func xmlToTemplate(output io.Writer, template string, data []byte) {
+	var report TestSuites
+	xml.Unmarshal(data, &report)
+	for _, s := range report.TestSuite {
+		for _, c := range s.TestCases {
+			if c.Failure != "" {
+				fmt.Fprintf(output, template, c.Name, c.ClassName, c.Failure)
 			}
 		}
 	}
 }
 
-// WriteToBuffer writes a block with detailed failure output into a given writer
-func WriteToBuffer(buf io.Writer, name string, class string, body string) error {
-	tmpl := `
-	<details>
-		<summary>
-			<code>%s in %s</code>
-		</summary>
+// defaultTemplate is what is used if another template is not provided.
+var defaultTemplate = `<details>
+	<summary>
 		<code>
-			<pre>%s</pre>
+		%s in %s
 		</code>
-	</details>
+	</summary>
+	<code>
+		<pre>
+		%s
+		</pre>
+	</code>
+</details>
 `
-	_, err := fmt.Fprintf(buf, tmpl, name, class, body)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
-// SetOutput returns a writer to a given file path, if none is given it returns os.Stdout
-func SetOutput(filePath string) (output io.Writer, close func() error) {
-	if filePath == "" {
-		output = os.Stdout
-		return
-	}
-
-	f, err := os.Create(filePath)
-	close = f.Close
-	if err != nil {
-		close()
-		fmt.Fprintf(os.Stderr, "Unable to open output file '%s': %v", filePath, err)
-		os.Exit(1)
-	}
-
-	output = f
-	return
-}
-
-// TestSuites are JUnit test suites
+// TestSuites are a collection of junit test suites
 type TestSuites struct {
 	Name      string      `xml:"name,attr"`
 	TestSuite []TestSuite `xml:"testsuite"`
 }
 
-// TestSuite is a JUnit test suite
+// TestSuite is a junit test suite
 type TestSuite struct {
 	Name      string     `xml:"name,attr"`
 	Tests     int        `xml:"tests,attr"`
@@ -91,7 +83,7 @@ type TestSuite struct {
 	TestCases []TestCase `xml:"testcase"`
 }
 
-// TestCase is a JUnit test case
+// TestCase is a junit test case
 type TestCase struct {
 	ClassName string  `xml:"classname,attr"`
 	Name      string  `xml:"name,attr"`
