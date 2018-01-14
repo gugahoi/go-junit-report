@@ -18,9 +18,11 @@ func usage() {
     _/ |\__,_|_| |_|_|\__|    |_|  \___| .__/ \___/|_|   \__|     \___\___/|_| |_|\_/ \___|_|   \__\___|_|   
    |__/                                |_|                                                                   
 
+   Examples:
 	junit-report-converter report.xml	
 	junit-report-converter report1.xml report2.xml	
-	`)
+	junit-report-converter *.xml	
+`)
 	os.Exit(1)
 }
 
